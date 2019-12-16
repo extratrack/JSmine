@@ -24,39 +24,70 @@ class Const{
     static MASTER_WIDTH = 30;
     static MASTER_HEIGHT = 16;
 
-    set canvas(canvas){
+    set CANVAS(canvas){
         this._canvas = canvas
     }
 
-    get canvas(){
+    get CANVAS(){
         return this._canvas;
         
-    }  
+    }
+    
+    set WIDTH(width){
+        this._width = width;
+    }
+
+    get WIDTH(){
+        return this._width;
+    }
+
+    set HEIGHT(height){
+        this._height = height;
+    }
+
+    get HEIGHT(){
+        return this._height;
+    }
 }
 
+// 闇のゲーム
 function start(level){
     init();
     resizeCanvasByLevel(level);
+    drawCellsByLevel(level);
 }
 
+// 初期設定(初期生成？)
 function init(){
     // マス保持クラス生成
     const maskedCells = new MaskedCells();
     const openedCells = new OpenedCells();
 
     // Canvas設定
-    Const.canvas = document.getElementById("minesweeper");
+    Const.CANVAS = document.getElementById("minesweeper");
 }
 
 // 難易度に合わせてキャンバスをリサイズ
 function resizeCanvasByLevel(gameLevel){
-    const width = gameLevel === 1 ? Const.BASIC_WIDTH
+    Const.WIDTH = gameLevel === 1 ? Const.BASIC_WIDTH
                 : gameLevel === 2 ? Const.EXPERT_WIDTH
                 : Const.MASTER_WIDTH;
-    const height = gameLevel === 1 ? Const.BASIC_HEIGHT
+    Const.HEIGHT = gameLevel === 1 ? Const.BASIC_HEIGHT
                  : gameLevel === 2 ? Const.EXPERT_HEIGHT
                  : Const.MASTER_HEIGHT;
 
-    Const.canvas.width = width * Const.CELL_SIZE;
-    Const.canvas.height = height * Const.CELL_SIZE;
+    Const.CANVAS.width = Const.WIDTH * Const.CELL_SIZE;
+    Const.CANVAS.height = Const.HEIGHT * Const.CELL_SIZE;
+}
+
+// 難易度に合わせてセルを描画
+function drawCellsByLevel(gameLevel){
+    const context = Const.CANVAS.getContext("2d");
+    context.fillStyle = "rgb(200, 200, 200)";
+
+    for(let row = 0; row < Const.HEIGHT; row++){
+        for(let col = 0; col < Const.WIDTH; col++){
+            context.fillRect(col * Const.CELL_SIZE, row * Const.CELL_SIZE, Const.CELL_SIZE - 1, Const.CELL_SIZE - 1);
+        }
+    }
 }
