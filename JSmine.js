@@ -1,5 +1,10 @@
 // 定数クラス
 class Const{
+    // マウスイベント用
+    static LEFT_CLICK = 0;
+    static RIGHT_CLICK = 2;
+
+    // セルサイズ
     static CELL_SIZE = 30;
 
     // 難易度ごとの情報
@@ -68,6 +73,14 @@ class Main{
     start(){
         this.initCanvas();
         this.setMinesPosition();
+        this.addListener();
+    }
+
+    // イベントリスナー追加
+    addListener(){
+        // 旗のために右クリックに犠牲になってもらう
+        Const.CANVAS.addEventListener("contextmenu", function(e){e.preventDefault();}, false);
+        Const.CANVAS.addEventListener("click", this.openCell(event), false);
     }
 
     // Canvas内描写
@@ -115,6 +128,13 @@ class Main{
         this.minesCells.setMinesPosition();
     }
 
+    // セルオープン処理
+    openCell(e){
+        let mouseClickX = e.pageX;
+        let mouseClickY = e.pageY;
+
+        this.maskedCells.openCell(mouseClickX, mouseClickY);
+    }
 }
 
 // 開いていないマス情報を保持するクラス
@@ -130,7 +150,14 @@ class MaskedCells{
     }
 
     // マスをオープン
-    openCell(row, col){
+    openCell(x, y){
+        if(y < 24){
+            return;
+        }
+
+        let row = Math.floor(x / Const.CELL_SIZE);
+        let col = Math.floor(y / Const.CELL_SIZE);
+
         let isOpened = this.cells[row][col];
         
         // マスがオープンされていない場合オープン
@@ -141,7 +168,7 @@ class MaskedCells{
     }
 
     drawCells(){
-
+        documebnt.write("ussu");
     }
 }
 
