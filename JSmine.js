@@ -1,34 +1,8 @@
-// 開いていないマス情報を保持するクラス
-class MaskedCells{
-    constructor(){
-        this.cells = [];
-        for(let row = 0; row < Const.ROW; row++){
-            this.cells[row] = [];
-            for(let col = 0; col < Const.COLUMN; col++){
-                this.cells[row][col] = 0;
-            }
-        }
-    }
-}
-
-// 開いたマス情報を保持するクラス
-class MinesCells{
-    constructor(){
-        this.cells = [];
-        for(let row = 0; row < Const.ROW; row++){
-            this.cells[row] = [];
-            for(let col = 0; col < Const.COLUMN; col++){
-                this.cells[row][col] = 0;
-            }
-        }
-    }
-}
-
 // 定数クラス
 class Const{
     static CELL_SIZE = 30;
 
-    // 難易度ごとのマス数
+    // 難易度ごとの情報
     static BASIC_COLUMN = 9;
     static BASIC_ROW = 9;
     static BASIC_MINES = 9;
@@ -81,77 +55,126 @@ class LevelEnum{
     static MASTER = 3;
 }
 
-// 闇のゲーム
-function start(level){
-    setConstValue(level);
+// ゲーム進行を管理するクラス
+class Main{
+    constructor(gameLevel){
+        this.setConstValue(gameLevel);
 
-    initCanvas();
+        this.minesCells = new MinesCells();
+        this.maskedCells = new MaskedCells();
+    }
 
-    let minesCells = createMinesCells();
-    let maskedCells = createMaskedCells();
+    // 闇のゲーム
+    start(){
+        this.initCanvas();
+        this.setMinesPosition();
+    }
+
+    // Canvas内描写
+    initCanvas(){
+        this.resizeCanvasByLevel();
+        this.drawCellsByLevel();
+    }
+
+    // 初期設定(初期生成？)
+    setConstValue(gameLevel){
+        // Canvas設定
+        Const.CANVAS = document.getElementById("minesweeper");
+
+        Const.COLUMN = gameLevel === LevelEnum.BASIC ? Const.BASIC_COLUMN
+                    : gameLevel === LevelEnum.EXPERT ? Const.EXPERT_COLUMN
+                    : Const.MASTER_COLUMN;
+        Const.ROW = gameLevel === LevelEnum.BASIC ? Const.BASIC_ROW
+                : gameLevel === LevelEnum.EXPERT ? Const.EXPERT_ROW
+                : Const.MASTER_ROW;
+        Const.MINES = gameLevel === LevelEnum.BASIC ? Const.BASIC_MINES
+                    : gameLevel === LevelEnum.EXPERT ? Const.EXPERT_MINES
+                    : Const.MASTER_MINES;
+    }
+
+    // 難易度に合わせてキャンバスをリサイズ
+    resizeCanvasByLevel(){
+        Const.CANVAS.width = Const.COLUMN * Const.CELL_SIZE;
+        Const.CANVAS.height = Const.ROW * Const.CELL_SIZE;
+    }
+
+    // 難易度に合わせてセルを描画
+    drawCellsByLevel(){
+        const context = Const.CANVAS.getContext("2d");
+        context.fillStyle = "rgb(160, 160, 160)";
+
+        for(let row = 0; row < Const.ROW; row++){
+            for(let col = 0; col < Const.COLUMN; col++){
+                context.fillRect(col * Const.CELL_SIZE, row * Const.CELL_SIZE, Const.CELL_SIZE - 1, Const.CELL_SIZE - 1);
+            }
+        }
+    }
+
+    // 地雷の位置設定
+    setMinesPosition(){
+        this.minesCells.setMinesPosition();
+    }
+
+}
+
+// 開いていないマス情報を保持するクラス
+class MaskedCells{
+    constructor(){
+        this.cells = [];
+        for(let row = 0; row < Const.ROW; row++){
+            this.cells[row] = [];
+            for(let col = 0; col < Const.COLUMN; col++){
+                this.cells[row][col] = 0;
+            }
+        }
+    }
+
+    // マスをオープン
+    openCell(row, col){
+        let isOpened = this.cells[row][col];
+        
+        // マスがオープンされていない場合オープン
+        if(!isOpened){
+            this.Cells[row][col] = !this.Cells[row][col];
+            this.drawCells();
+        }
+    }
+
+    drawCells(){
+
+    }
+}
+
+// 地雷関連のマス情報を保持するクラス
+class MinesCells{
+    constructor(){
+        this.cells = [];
+        for(let row = 0; row < Const.ROW; row++){
+            this.cells[row] = [];
+            for(let col = 0; col < Const.COLUMN; col++){
+                this.cells[row][col] = 0;
+            }
+        }
+    }
+
+    // 地雷を設置
+    setMinesPosition(){
+        let notPutMines = Const.MINES;
+        while(notPutMines){
+            let putMinesRow = Math.floor(Math.random() * Const.ROW);
+            let putMinesColumn = Math.floor(Math.random() * Const.COLUMN);
+            let isNotPutMines = this.cells[putMinesRow][putMinesColumn];
     
-    setMinesPosition(minesCells);
-}
-
-// Canvas内描写
-function initCanvas(){
-    resizeCanvasByLevel();
-    drawCellsByLevel();
-}
-
-function createMinesCells(){
-    return new MinesCells();
-}
-
-// マス情報を保持するクラス作成
-function createMaskedCells(){
-    return new MaskedCells();
-}
-
-// 初期設定(初期生成？)
-function setConstValue(gameLevel){
-    // Canvas設定
-    Const.CANVAS = document.getElementById("minesweeper");
-
-    Const.COLUMN = gameLevel === LevelEnum.BASIC ? Const.BASIC_COLUMN
-                 : gameLevel === LevelEnum.EXPERT ? Const.EXPERT_COLUMN
-                 : Const.MASTER_COLUMN;
-    Const.ROW = gameLevel === LevelEnum.BASIC ? Const.BASIC_ROW
-              : gameLevel === LevelEnum.EXPERT ? Const.EXPERT_ROW
-              : Const.MASTER_ROW;
-    Const.MINES = gameLevel === LevelEnum.BASIC ? Const.BASIC_MINES
-                : gameLevel === LevelEnum.EXPERT ? Const.EXPERT_MINES
-                : Const.MASTER_MINES;
-}
-
-// 難易度に合わせてキャンバスをリサイズ
-function resizeCanvasByLevel(){
-    Const.CANVAS.width = Const.COLUMN * Const.CELL_SIZE;
-    Const.CANVAS.height = Const.ROW * Const.CELL_SIZE;
-}
-
-// 難易度に合わせてセルを描画
-function drawCellsByLevel(){
-    const context = Const.CANVAS.getContext("2d");
-    context.fillStyle = "rgb(160, 160, 160)";
-
-    for(let row = 0; row < Const.ROW; row++){
-        for(let col = 0; col < Const.COLUMN; col++){
-            context.fillRect(col * Const.CELL_SIZE, row * Const.CELL_SIZE, Const.CELL_SIZE - 1, Const.CELL_SIZE - 1);
+            if(!isNotPutMines){
+                this.cells[putMinesRow][putMinesColumn] = Const.MINE_NUMBER;
+                notPutMines--;
+            }
         }
     }
 }
 
-// 地雷の位置設定
-function setMinesPosition(minesCells){
-    let notPutMines = Const.MINES;
-    while(notPutMines > 0){
-        putMinesRow = Math.floor(Math.random() * Const.ROW);
-        putMinesColumn = Math.floor(Math.random() * Const.COLUMN);
-
-        if(minesCells.cells[putMinesRow][putMinesColumn] === 0){
-            minesCells.cells[putMinesRow][putMinesColumn] = Const.MINE_NUMBER;
-            notPutMines--;
-        }
-    }
+// ゲーム開始
+function start(gameLevel){
+    let main = new Main(gameLevel);
+    main.start();
 }
